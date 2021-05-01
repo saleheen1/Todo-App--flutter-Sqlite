@@ -26,14 +26,16 @@ class _CategoriesState extends State<Categories> {
                 child: Text("Cancel", style: TextStyle(color: kGrey)),
               ),
               FlatButton(
-                onPressed: () {
+                onPressed: () async {
                   _categoryModel.name = _categoryNameEditingController.text;
                   _categoryModel.description =
                       _categoryDescEditingController.text;
-                  CategoryService().saveCategory(_categoryModel);
-                  _categoryDescEditingController.text = "";
-                  _categoryNameEditingController.text = "";
-                  Navigator.of(context).pop(true);
+                  var result =
+                      await CategoryService().saveCategory(_categoryModel);
+                  print(result);
+                  // _categoryDescEditingController.text = "";
+                  // _categoryNameEditingController.text = "";
+                  // Navigator.of(context).pop(true);
                 },
                 child: Text(
                   "Save",
