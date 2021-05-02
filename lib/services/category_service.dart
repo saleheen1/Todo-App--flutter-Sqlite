@@ -15,4 +15,9 @@ class CategoryService {
   readCategory() async {
     return await _dbfunctions.readData("categories");
   }
+
+  //fetch category by id
+  readCategoryById(categoryId) async {
+    return await _dbfunctions.readDataById("categories", categoryId);
+  }
 }

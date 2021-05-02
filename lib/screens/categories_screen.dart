@@ -13,7 +13,11 @@ class _CategoriesState extends State<Categories> {
       TextEditingController();
   TextEditingController _categoryDescEditingController =
       TextEditingController();
+
+  TextEditingController _edit_categoryNameController = TextEditingController();
+  TextEditingController _edit_categoryDescController = TextEditingController();
   Category _categoryModel = Category();
+  var categoryG;
 
   //fetching category
   List<Category> _categoryList = [];
@@ -32,6 +36,17 @@ class _CategoriesState extends State<Categories> {
     });
   }
 
+  //edit category
+  _editCategory(categoryId) async {
+    categoryG = await CategoryService().readCategoryById(categoryId);
+    _editFormDialog();
+    setState(() {
+      _edit_categoryNameController.text = categoryG[0]["name"] ?? 'No Name';
+      _edit_categoryDescController.text =
+          categoryG[0]["description"] ?? 'No Description';
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +61,9 @@ class _CategoriesState extends State<Categories> {
           return AlertDialog(
             actions: [
               FlatButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
                 child: Text("Cancel", style: TextStyle(color: kGrey)),
               ),
               FlatButton(
@@ -100,7 +117,9 @@ class _CategoriesState extends State<Categories> {
           return AlertDialog(
             actions: [
               FlatButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
                 child: Text("Cancel", style: TextStyle(color: kGrey)),
               ),
               FlatButton(
@@ -126,7 +145,7 @@ class _CategoriesState extends State<Categories> {
               child: Column(
                 children: [
                   TextField(
-                    controller: _categoryNameEditingController,
+                    controller: _edit_categoryNameController,
                     decoration: InputDecoration(
                         // hintText: "Write a category",
                         labelText: "Category Name"),
@@ -135,7 +154,7 @@ class _CategoriesState extends State<Categories> {
                     height: 10,
                   ),
                   TextField(
-                    controller: _categoryDescEditingController,
+                    controller: _edit_categoryDescController,
                     decoration:
                         InputDecoration(labelText: "Category description"),
                   )
@@ -174,7 +193,9 @@ class _CategoriesState extends State<Categories> {
                     return ListTile(
                       leading: IconButton(
                         icon: Icon(Icons.edit),
-                        onPressed: () {},
+                        onPressed: () {
+                          _editCategory(_categoryList[index].id);
+                        },
                       ),
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
