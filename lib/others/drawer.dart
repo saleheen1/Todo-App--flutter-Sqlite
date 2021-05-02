@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:todo_sqlite/screens/categories.dart';
+import 'package:todo_sqlite/screens/categories_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
