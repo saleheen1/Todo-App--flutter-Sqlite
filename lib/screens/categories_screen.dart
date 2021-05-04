@@ -9,6 +9,15 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
+  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
+  _showUpdateSnack(message) {
+    var _snack = SnackBar(
+      content: message,
+      backgroundColor: kPrimaryColor,
+    );
+    _globalKey.currentState.showSnackBar(_snack);
+  }
+
   TextEditingController _categoryNameEditingController =
       TextEditingController();
   TextEditingController _categoryDescEditingController =
@@ -24,27 +33,27 @@ class _CategoriesState extends State<Categories> {
   getAllCategories() async {
     var categories = await CategoryService().readCategory();
     categories.forEach((category) {
-      setState(() {
-        //don't forget to get instance of Category inside here otherwise it won't work
-        Category categoryModel = Category();
-        categoryModel.name = category["name"];
-        categoryModel.description = category["description"];
-        categoryModel.id = category["id"];
+      //don't forget to get instance of Category inside here otherwise it won't work
+      Category categoryModel = Category();
+      categoryModel.name = category["name"];
+      categoryModel.description = category["description"];
+      categoryModel.id = category["id"];
 
-        _categoryList.add(categoryModel);
-      });
+      _categoryList.add(categoryModel);
     });
+    setState(() {});
   }
 
   //edit category
   _editCategory(categoryId) async {
     categoryG = await CategoryService().readCategoryById(categoryId);
-    _editFormDialog();
+
     setState(() {
       _edit_categoryNameController.text = categoryG[0]["name"] ?? 'No Name';
       _edit_categoryDescController.text =
           categoryG[0]["description"] ?? 'No Description';
     });
+    _editFormDialog();
   }
 
   @override
@@ -124,15 +133,16 @@ class _CategoriesState extends State<Categories> {
               ),
               FlatButton(
                 onPressed: () async {
-                  _categoryModel.name = _categoryNameEditingController.text;
+                  _categoryModel.id = categoryG[0]['id'];
+                  _categoryModel.name = _edit_categoryNameController.text;
                   _categoryModel.description =
-                      _categoryDescEditingController.text;
+                      _edit_categoryDescController.text;
                   var result =
-                      await CategoryService().saveCategory(_categoryModel);
-                  print(result);
-                  _categoryDescEditingController.text = "";
-                  _categoryNameEditingController.text = "";
+                      await CategoryService().updateCategory(_categoryModel);
+
                   Navigator.of(context).pop(true);
+                  _showUpdateSnack(Text("Category updated"));
+                  setState(() {});
                 },
                 child: Text(
                   "Update",
@@ -165,9 +175,47 @@ class _CategoriesState extends State<Categories> {
         });
   }
 
+  _deleteCategoryDialog(categoryId) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (param) {
+          return AlertDialog(
+            actions: [
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: Text("Cancel", style: TextStyle(color: kGrey)),
+              ),
+              FlatButton(
+                onPressed: () async {
+                  // _categoryModel.id = categoryG[0]['id'];
+                  // _categoryModel.name = _edit_categoryNameController.text;
+                  // _categoryModel.description =
+                  //     _edit_categoryDescController.text;
+
+                  await CategoryService().deleteCategory(categoryId);
+
+                  Navigator.of(context).pop(true);
+                  _showUpdateSnack(Text("Category deleted"));
+                  setState(() {});
+                },
+                child: Text(
+                  "Delete",
+                  style: TextStyle(color: Colors.red),
+                ),
+              )
+            ],
+            title: Text("Are you sure?"),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _globalKey,
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: kGrey,
@@ -182,58 +230,62 @@ class _CategoriesState extends State<Categories> {
         elevation: 0.3,
         actions: [],
       ),
-      body: Column(
-        children: [
-          _categoryList != null
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.vertical,
-                  itemCount: _categoryList.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          _editCategory(_categoryList[index].id);
-                        },
-                      ),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('${_categoryList[index].name}'),
-                          IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                            onPressed: () {},
-                          )
-                        ],
-                      ),
-                      subtitle: Text('${_categoryList[index].description}'),
-                    );
-                  },
-                )
-              : Container(
-                  child: Center(),
-                ),
-          Container(
-              margin: EdgeInsets.fromLTRB(25, 15, 25, 10),
-              child: Column(
-                children: [
-                  FlatButton(
-                    onPressed: () {
-                      _showDialog();
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _categoryList != null
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    itemCount: _categoryList.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            _editCategory(_categoryList[index].id);
+                          },
+                        ),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('${_categoryList[index].name}'),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                _deleteCategoryDialog(_categoryList[index].id);
+                              },
+                            )
+                          ],
+                        ),
+                        subtitle: Text('${_categoryList[index].description}'),
+                      );
                     },
-                    color: kPrimaryColor,
-                    child: Text(
-                      "Create new",
-                      style: TextStyle(color: Colors.white),
-                    ),
                   )
-                ],
-              )),
-        ],
+                : Container(
+                    child: Center(),
+                  ),
+            Container(
+                margin: EdgeInsets.fromLTRB(25, 15, 25, 10),
+                child: Column(
+                  children: [
+                    FlatButton(
+                      onPressed: () {
+                        _showDialog();
+                      },
+                      color: kPrimaryColor,
+                      child: Text(
+                        "Create new",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                )),
+          ],
+        ),
       ),
     );
   }

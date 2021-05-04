@@ -36,4 +36,15 @@ class DbFunctions {
     var connection = await database;
     return await connection.query(table, where: 'id=?', whereArgs: [itemId]);
   }
+
+  updateData(table, data) async {
+    var connection = await database;
+    return await connection
+        .update(table, data, where: 'id=?', whereArgs: [data['id']]);
+  }
+
+  deleteData(table, id) async {
+    var connection = await database;
+    await connection.rawDelete("DELETE FROM $table WHERE id = $id");
+  }
 }

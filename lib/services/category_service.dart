@@ -20,4 +20,14 @@ class CategoryService {
   readCategoryById(categoryId) async {
     return await _dbfunctions.readDataById("categories", categoryId);
   }
+
+  //update category by id
+  updateCategory(Category categoryModel) async {
+    return await _dbfunctions.updateData(
+        "categories", categoryModel.categoryMap());
+  }
+
+  deleteCategory(id) async {
+    await _dbfunctions.deleteData("categories", id);
+  }
 }
