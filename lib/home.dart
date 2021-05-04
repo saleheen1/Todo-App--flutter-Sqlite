@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:todo_sqlite/screens/todoScreen.dart';
 
 import 'others/constants.dart';
 import 'others/drawer.dart';
@@ -22,19 +24,20 @@ class Home extends StatelessWidget {
         brightness: Brightness.dark,
         elevation: 0.3,
         actions: [
-          // InkWell(
-          //   onTap: () {
-          //     _scaffoldKey.currentState.openDrawer();
-          //   },
-          //   child: Padding(
-          //     padding: EdgeInsets.fromLTRB(20, 19, 25, 10),
-          //     child: Icon(
-          //       Icons.menu,
-          //       color: kGrey,
-          //       size: 28,
-          //     ),
-          //   ),
-          // ),
+          InkWell(
+            onTap: () {
+              Get.to(TodoScreen());
+            },
+            child: Container(
+              padding: EdgeInsets.all(15),
+              margin: EdgeInsets.only(right: 20),
+              child: Icon(
+                Icons.add,
+                color: kPrimaryColor,
+                size: 30,
+              ),
+            ),
+          )
         ],
       ),
     );
