@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:todo_sqlite/models/categoryModel.dart';
+import 'package:todo_sqlite/others/constants.dart';
 import 'package:todo_sqlite/screens/categories_screen.dart';
+import 'package:todo_sqlite/screens/todoByCategory.dart';
+import 'package:todo_sqlite/services/category_service.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
+  @override
+  _AppDrawerState createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  CategoryService _categoryService = CategoryService();
+
+  List categoryList = List();
+
+  _getAllCategory() async {
+    var _categories = await _categoryService.readCategory();
+    _categories.forEach((category) {
+      Category _categoryModel = Category();
+      _categoryModel.name = category["name"];
+      _categoryModel.description = category["description"];
+      _categoryModel.id = category["id"];
+      categoryList.add(_categoryModel);
+    });
+    return categoryList;
+  }
+
+  // @override
+  // void initState() {
+  //   _getAllCategory();
+  //   super.initState();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -24,12 +55,6 @@ class AppDrawer extends StatelessWidget {
                   Container(
                     height: 100,
                     width: double.infinity,
-                    // decoration: BoxDecoration(
-                    //     image: DecorationImage(
-                    //   alignment: Alignment.bottomLeft,
-                    //   image: AssetImage('assets/images/mosque.png'),
-                    //   fit: BoxFit.fitHeight,
-                    // )),
                   ),
                 ],
               )),
@@ -47,28 +72,48 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.star_purple500_outlined),
-              title: Text("Buy premium"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.star,
-              ),
-              title: Text(
-                "Rate us",
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.design_services_sharp),
-              title: Text("About"),
-              onTap: () {},
-            ),
-            ListTile(
-                leading: Icon(Icons.broken_image_sharp),
-                title: Text("Report a bug"),
-                onTap: () {}),
+            FutureBuilder(
+              future: _getAllCategory(),
+              builder: (ctx, snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    itemCount: categoryList.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          Get.to(TodoByCategory(
+                            category: snapshot.data[index].name,
+                          ));
+                        },
+                        child: ListTile(
+                          leading: IconButton(
+                            icon: Icon(
+                              Icons.circle,
+                              color: kPrimaryColor,
+                              size: 10,
+                            ),
+                            onPressed: () {
+                              // _editCategory(_categoryList[index].id);
+                            },
+                          ),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('${snapshot.data[index].name}'),
+                            ],
+                          ),
+                          // subtitle: Text('${_categoryList[index].description}'),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            )
           ],
         ),
       ),

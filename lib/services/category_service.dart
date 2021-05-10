@@ -30,4 +30,9 @@ class CategoryService {
   deleteCategory(id) async {
     await _dbfunctions.deleteData("categories", id);
   }
+
+  //read todos by category
+  readTodosByCategory(category) async {
+    return await _dbfunctions.readDataByColumn("todos", "category", category);
+  }
 }

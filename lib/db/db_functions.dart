@@ -47,4 +47,11 @@ class DbFunctions {
     var connection = await database;
     await connection.rawDelete("DELETE FROM $table WHERE id = $id");
   }
+
+  //Read data by column name
+  readDataByColumn(table, columnName, columnValue) async {
+    var connection = await database;
+    return await connection
+        .query(table, where: '$columnName=?', whereArgs: [columnValue]);
+  }
 }
